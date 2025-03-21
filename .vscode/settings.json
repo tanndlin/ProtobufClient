@@ -1,0 +1,34 @@
+{
+    "restoreTerminals.terminals": [
+        {
+            "splitTerminals": [
+                {
+                    "name": "Git",
+                    "commands": [
+                        "git status"
+                    ]
+                },
+            ]
+        },
+        {
+            "splitTerminals": [
+                {
+                    "name": "Run",
+                    "commands": [
+                        "npm run watch"
+                    ]
+                },
+                {
+                    "name": "Test",
+                    "commands": [
+                        "npm test",
+                    ]
+                }
+            ]
+        },
+    ],
+    "restoreTerminals.runOnStartup": true,
+    "eslint.validate": [
+        "typescript",
+    ],
+}
