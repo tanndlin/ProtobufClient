@@ -1,6 +1,6 @@
 import { LexerToken } from './Lexer';
 import ProtoMessageType from './ProtoMessageType';
-import { ValueType } from './types';
+import { ProtoField, ValueType } from './types';
 import { isValueType } from './utils';
 
 class Parser {
@@ -44,14 +44,14 @@ class Parser {
         this.advance();
         this.expectToken('{');
 
-        const fields: Record<string, ValueType> = {};
+        const fields: Record<string, ProtoField> = {};
 
         while (this.getCurrentToken()?.type !== '}') {
             if (!this.getCurrentToken()) {
                 throw new Error('Unexpected end of input while parsing fields');
             }
             const field = this.parseField(fieldNames, fieldNumbers);
-            fields[field.name] = field.type;
+            fields[field.name] = field;
         }
 
         this.expectToken('}');
@@ -61,8 +61,18 @@ class Parser {
     private parseField(
         fieldNames: Set<string>,
         fieldNumbers: Set<number>,
-    ): { name: string; type: ValueType } {
-        const fieldType = this.getCurrentToken()?.value;
+    ): ProtoField {
+        const nextToken = this.getCurrentToken();
+        if (!nextToken) {
+            throw new Error('Expected field declaration');
+        }
+
+        const optional =
+            nextToken.type === 'modifier' && nextToken.value === 'optional';
+
+        const fieldType = optional
+            ? this.getCurrentToken()?.value
+            : nextToken.value;
         if (!fieldType) {
             throw new Error('Expected field type');
         }
@@ -104,7 +114,12 @@ class Parser {
             throw new Error('Expected ; at the end of field declaration');
         }
 
-        return { name: fieldName, type: fieldType as ValueType };
+        return {
+            name: fieldName,
+            type: fieldType as ValueType,
+            id: fieldNumber,
+            optional: false,
+        };
     }
 
     public parse(): ProtoMessageType<any> {

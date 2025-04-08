@@ -1,11 +1,4 @@
-import { Lexer } from './Lexer';
+import { parseVarint } from './decode';
 
-const protoContent = `
-message ExampleMessage {
-    string temp = 1;
-    int32 temp2 = 2;
-}
-`;
-
-const tokens = new Lexer(protoContent).tokenize();
-console.log(tokens);
+const buffer = Buffer.from([0x96, 0x01]);
+console.log(parseVarint(buffer));
