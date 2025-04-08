@@ -1,5 +1,5 @@
 import { decodeVarint } from './decode';
-import { encodeVarint } from './encode';
+import { encodeFixed32, encodeFixed64, encodeVarint } from './encode';
 import { ProtoField, WireType } from './types';
 import { valueTypeToWireType } from './utils';
 
@@ -54,7 +54,6 @@ class ProtoMessageType<T> {
                 ) as T[keyof T & string];
                 result[field.name] = coerced;
                 break;
-
             default:
                 throw new Error(
                     `Attempt to decode unimplemented wire type (type: ${field.type})`,
@@ -82,9 +81,19 @@ class ProtoMessageType<T> {
         buffer.push((field.id << 3) | wireType);
 
         switch (wireType) {
-            case WireType.Varint: // Varint
+            case WireType.Varint:
                 buffer.push(...encodeVarint(value as number, field.type));
                 break;
+            case WireType.Fixed64:
+                buffer.push(...encodeFixed64(value as number, field.type));
+                break;
+            case WireType.Fixed32:
+                buffer.push(...encodeFixed32(value as number, field.type));
+                break;
+            default:
+                throw new Error(
+                    `Attempt to encode unimplemented wire type (type: ${field.type})`,
+                );
         }
 
         return buffer;

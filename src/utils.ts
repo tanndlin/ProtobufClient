@@ -16,6 +16,10 @@ export function valueTypeToWireType(valueType: ValueType): WireType {
         case 'sint32':
         case 'uint32':
             return WireType.Varint;
+        case 'double':
+            return WireType.Fixed64;
+        case 'float':
+            return WireType.Fixed32;
         case 'string':
             return WireType.LengthDelimited;
     }

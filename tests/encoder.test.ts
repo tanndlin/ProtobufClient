@@ -74,6 +74,36 @@ describe('Encoder Tests', () => {
             ]),
         );
     });
+
+    it('Should encode a double messsage field', () => {
+        //https://protobuf.dev/programming-guides/encoding/#simple
+        const message = new ProtoMessageType('Test1`', [
+            {
+                type: 'double',
+                id: 1,
+                name: 'a',
+            },
+        ]);
+        const buffer = message.encode({ a: 1.25 });
+        expect(buffer).toStrictEqual(
+            Buffer.from([0x09, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xf4, 0x3f]),
+        );
+    });
+
+    it('Should encode a float messsage field', () => {
+        //https://protobuf.dev/programming-guides/encoding/#simple
+        const message = new ProtoMessageType('Test1`', [
+            {
+                type: 'float',
+                id: 1,
+                name: 'a',
+            },
+        ]);
+        const buffer = message.encode({ a: 1.25 });
+        expect(buffer).toStrictEqual(
+            Buffer.from([0x0d, 0x00, 0x00, 0xa0, 0x3f]),
+        );
+    });
 });
 
 describe('Encoder Helper Tests', () => {

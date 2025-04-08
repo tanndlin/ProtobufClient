@@ -2,6 +2,8 @@ export const ValueTypes = [
     'int32',
     'uint32',
     'sint32',
+    'float',
+    'double',
     'string',
     'bool',
 ] as const;

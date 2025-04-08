@@ -49,3 +49,59 @@ function encodeNegativeInt(value: number): number[] {
 
     return buffer;
 }
+
+export function encodeFixed64(value: number, valueType: ValueType): number[] {
+    if (valueType === 'double') {
+        return decimalTo64bitIEEE754(value);
+    }
+
+    if (valueType === 'float') {
+        return decimalTo32BitIEEE754(value);
+    }
+
+    const buffer = [];
+    for (let i = 0; i < 8; i++) {
+        buffer.push(value & 0xff);
+        value >>>= 8;
+    }
+
+    return buffer.reverse();
+}
+
+export function encodeFixed32(value: number, valueType: ValueType): number[] {
+    if (valueType === 'float') {
+        return decimalTo32BitIEEE754(value);
+    }
+
+    const buffer = [];
+    for (let i = 0; i < 8; i++) {
+        buffer.push(value & 0xff);
+        value >>>= 8;
+    }
+
+    return buffer.reverse();
+}
+
+function decimalTo64bitIEEE754(value: number): number[] {
+    const buffer = new ArrayBuffer(8); // 8 bytes = 64 bits
+    const view = new DataView(buffer);
+    view.setFloat64(0, value, false); // false = big-endian (most significant byte first)
+
+    const bytes: number[] = [];
+    for (let i = 0; i < 8; i++) {
+        bytes.push(view.getUint8(i));
+    }
+    return bytes.reverse();
+}
+
+function decimalTo32BitIEEE754(value: number): number[] {
+    const buffer = new ArrayBuffer(4); // 4 bytes = 32 bits
+    const view = new DataView(buffer);
+    view.setFloat32(0, value, false); // false = big-endian (most significant byte first)
+
+    const bytes: number[] = [];
+    for (let i = 0; i < 4; i++) {
+        bytes.push(view.getUint8(i));
+    }
+    return bytes.reverse();
+}
