@@ -7,12 +7,9 @@ const messageType = new ProtoMessageType('TestMessage', [
         id: 1,
         type: 'int32',
     },
-    {
-        name: 'b',
-        id: 2,
-        type: 'int32',
-    },
 ]);
+
+console.log(messageType.encode({ a: -2 }));
 
 const decoded = messageType.decode(buffer);
 console.log(decoded);

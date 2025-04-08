@@ -1,12 +1,13 @@
 import { encodeVarint } from '../src/encode';
 import ProtoMessageType from '../src/ProtoMessageType';
+import { ValueType } from '../src/types';
 
 describe('Encoder Tests', () => {
     it('Should encode a simple message', () => {
         //https://protobuf.dev/programming-guides/encoding/#simple
         const message = new ProtoMessageType('Test1`', [
             {
-                type: 'int32',
+                type: 'uint32',
                 id: 1,
                 optional: true,
                 name: 'a',
@@ -25,13 +26,13 @@ describe('Encoder Tests', () => {
     it('Should encode a message with 2 values', () => {
         const message = new ProtoMessageType('Test1`', [
             {
-                type: 'int32',
+                type: 'uint32',
                 id: 1,
                 optional: true,
                 name: 'a',
             },
             {
-                type: 'int32',
+                type: 'uint32',
                 id: 2,
                 optional: true,
                 name: 'b',
@@ -55,15 +56,73 @@ describe('Encoder Tests', () => {
         const buffer = message.encode({ a: true });
         expect(buffer).toStrictEqual(Buffer.from([0x08, 0x01]));
     });
+
+    it('Should encode a negative sint32', () => {
+        //https://protobuf.dev/programming-guides/encoding/#simple
+        const message = new ProtoMessageType('Test1`', [
+            {
+                type: 'int32',
+                id: 1,
+                name: 'a',
+            },
+        ]);
+        const buffer = message.encode({ a: -2 });
+        expect(buffer).toStrictEqual(
+            Buffer.from([
+                0x08, 0xfe, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+                0x01,
+            ]),
+        );
+    });
 });
 
 describe('Encoder Helper Tests', () => {
     it.each([
-        [150, [0x96, 0x01]],
-        [300, [0xac, 0x02]],
-        [0, [0]],
-    ])('Should encode varint %d to %s', (value: number, expected: number[]) => {
-        const buffer = encodeVarint(value);
-        expect(buffer).toEqual(expected);
+        ['uint32' as const, 150, [0x96, 0x01]],
+        ['uint32' as const, 300, [0xac, 0x02]],
+        ['uint32' as const, 0, [0]],
+    ])(
+        'Should encode %s %d to %s',
+        (valueType: ValueType, value: number, expected: number[]) => {
+            const buffer = encodeVarint(value, valueType);
+            expect(buffer).toEqual(expected);
+        },
+    );
+
+    it.each([
+        ['int32' as const, 150, [0x96, 0x01]],
+        ['int32' as const, 300, [0xac, 0x02]],
+        ['int32' as const, 0, [0]],
+        [
+            'int32' as const,
+            -2,
+            [0xfe, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x01],
+        ],
+    ])(
+        'Should encode %s %d to %s',
+        (valueType: ValueType, value: number, expected: number[]) => {
+            const buffer = encodeVarint(value, valueType);
+            expect(buffer).toEqual(expected);
+        },
+    );
+
+    it.each([
+        ['sint32' as const, 0, [0x00]],
+        ['sint32' as const, -1, [0x01]],
+        ['sint32' as const, 1, [0x02]],
+        ['sint32' as const, -2, [0x03]],
+        ['sint32' as const, 2, [0x04]],
+    ])(
+        'Should encode sint %d as to %s',
+        (valueType: ValueType, value: number, expected: number[]) => {
+            const buffer = encodeVarint(value, valueType);
+            expect(buffer).toEqual(expected);
+        },
+    );
+
+    it('Should throw for encoding negative uint', () => {
+        expect(() => encodeVarint(-1, 'uint32')).toThrow(
+            'Cannot encode negative as uint (value: -1)',
+        );
     });
 });

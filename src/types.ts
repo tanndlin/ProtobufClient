@@ -1,4 +1,10 @@
-export const ValueTypes = ['string', 'int32', 'bool'] as const;
+export const ValueTypes = [
+    'int32',
+    'uint32',
+    'sint32',
+    'string',
+    'bool',
+] as const;
 export type ValueType = (typeof ValueTypes)[number];
 
 export type ProtoField<T> = {

@@ -82,7 +82,7 @@ class ProtoMessageType<T> {
 
         switch (wireType) {
             case WireType.Varint: // Varint
-                buffer.push(...encodeVarint(value as number));
+                buffer.push(...encodeVarint(value as number, field.type));
                 break;
         }
 

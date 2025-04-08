@@ -13,8 +13,19 @@ export function valueTypeToWireType(valueType: ValueType): WireType {
     switch (valueType) {
         case 'bool':
         case 'int32':
+        case 'sint32':
+        case 'uint32':
             return WireType.Varint;
         case 'string':
             return WireType.LengthDelimited;
     }
+}
+
+export function to64Bit(value: bigint): number[] {
+    const bits = [];
+    for (let i = 0; i < 64; i++) {
+        bits.push(Number((value >> BigInt(i)) & BigInt(1)));
+    }
+
+    return bits;
 }
