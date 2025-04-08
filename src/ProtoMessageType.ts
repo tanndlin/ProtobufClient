@@ -46,6 +46,7 @@ class ProtoMessageType<T> {
                 const { offset: newOffset, value } = decodeVarint(
                     buffer,
                     offset,
+                    field.type,
                 );
                 offset = newOffset;
                 const coerced = (
