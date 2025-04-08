@@ -71,6 +71,38 @@ describe('Decoder Tests', () => {
         expect(decoded).toHaveProperty('a');
         expect(decoded.a).toBe(true);
     });
+
+    it('Should decode a double field', () => {
+        const messageType = new ProtoMessageType('TestMessage', [
+            {
+                name: 'a',
+                id: 1,
+                type: 'double',
+            },
+        ]);
+
+        const buffer = Buffer.from([
+            0x09, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xf4, 0x3f,
+        ]);
+        const decoded = messageType.decode(buffer);
+        expect(decoded).toHaveProperty('a');
+        expect(decoded.a).toBe(1.25);
+    });
+
+    it('Should decode a float field', () => {
+        const messageType = new ProtoMessageType('TestMessage', [
+            {
+                name: 'a',
+                id: 1,
+                type: 'float',
+            },
+        ]);
+
+        const buffer = Buffer.from([0x0d, 0x00, 0x00, 0xa0, 0x3f]);
+        const decoded = messageType.decode(buffer);
+        expect(decoded).toHaveProperty('a');
+        expect(decoded.a).toBe(1.25);
+    });
 });
 
 describe('Decode Helper Tests', () => {

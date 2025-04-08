@@ -54,6 +54,16 @@ class ProtoMessageType<T> {
                 ) as T[keyof T & string];
                 result[field.name] = coerced;
                 break;
+            case WireType.Fixed64:
+                const fixed64 = buffer.readDoubleLE(offset);
+                offset += 8;
+                result[field.name] = fixed64 as T[keyof T & string];
+                break;
+            case WireType.Fixed32:
+                const fixed32 = buffer.readFloatLE(offset);
+                offset += 4;
+                result[field.name] = fixed32 as T[keyof T & string];
+                break;
             default:
                 throw new Error(
                     `Attempt to decode unimplemented wire type (type: ${field.type})`,

@@ -76,7 +76,6 @@ describe('Encoder Tests', () => {
     });
 
     it('Should encode a double messsage field', () => {
-        //https://protobuf.dev/programming-guides/encoding/#simple
         const message = new ProtoMessageType('Test1`', [
             {
                 type: 'double',
@@ -91,7 +90,6 @@ describe('Encoder Tests', () => {
     });
 
     it('Should encode a float messsage field', () => {
-        //https://protobuf.dev/programming-guides/encoding/#simple
         const message = new ProtoMessageType('Test1`', [
             {
                 type: 'float',
