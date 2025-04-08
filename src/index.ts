@@ -1,4 +1,18 @@
-import { parseVarint } from './decode';
+import ProtoMessageType from './ProtoMessageType';
 
-const buffer = Buffer.from([0x96, 0x01]);
-console.log(parseVarint(buffer));
+const buffer = Buffer.from([0x08, 0x96, 0x01, 0x10, 0x45]); // field number 1, wire type 0 (varint)
+const messageType = new ProtoMessageType('TestMessage', [
+    {
+        name: 'a',
+        id: 1,
+        type: 'int32',
+    },
+    {
+        name: 'b',
+        id: 2,
+        type: 'int32',
+    },
+]);
+
+const decoded = messageType.decode(buffer);
+console.log(decoded);

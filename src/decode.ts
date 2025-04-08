@@ -1,14 +1,13 @@
-export function parseVarint(buffer: Buffer): number {
+export function decodeVarint(buffer: Buffer, offset: number) {
     const bytes = [];
-    while (buffer.length > 0) {
-        const byte = buffer[0];
+    while (offset < buffer.length) {
+        const byte = buffer[offset++];
         const msb = byte & 0x80;
         if (msb === 0) {
             bytes.push(byte);
             break;
         }
         bytes.push(byte & 0x7f);
-        buffer = buffer.slice(1);
     }
 
     let value = 0;
@@ -18,5 +17,5 @@ export function parseVarint(buffer: Buffer): number {
         value |= (bigEndian[i] & 0x7f) << (7 * (bigEndian.length - 1 - i));
     }
 
-    return value;
+    return { value, offset };
 }

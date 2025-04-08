@@ -1,8 +1,8 @@
 export const ValueTypes = ['string', 'int32'] as const;
 export type ValueType = (typeof ValueTypes)[number];
 
-export type ProtoField = {
-    name: string;
+export type ProtoField<T> = {
+    name: keyof T & string;
     type: ValueType;
     id: number;
     optional?: boolean;

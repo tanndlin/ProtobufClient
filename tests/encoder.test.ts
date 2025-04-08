@@ -4,14 +4,14 @@ import ProtoMessageType from '../src/ProtoMessageType';
 describe('Encoder Tests', () => {
     it('Should encode a simple message', () => {
         //https://protobuf.dev/programming-guides/encoding/#simple
-        const message = new ProtoMessageType('Test1`', {
-            a: {
+        const message = new ProtoMessageType('Test1`', [
+            {
                 type: 'int32',
                 id: 1,
                 optional: true,
                 name: 'a',
             },
-        });
+        ]);
         const buffer = message.encode({ a: 150 });
         expect(buffer).toBeInstanceOf(Buffer);
 
@@ -23,20 +23,20 @@ describe('Encoder Tests', () => {
     });
 
     it('Should encode a message with 2 values', () => {
-        const message = new ProtoMessageType('Test1`', {
-            a: {
+        const message = new ProtoMessageType('Test1`', [
+            {
                 type: 'int32',
                 id: 1,
                 optional: true,
                 name: 'a',
             },
-            b: {
+            {
                 type: 'int32',
                 id: 2,
                 optional: true,
                 name: 'b',
             },
-        });
+        ]);
         const buffer = message.encode({ a: 150, b: 69 });
         expect(buffer).toStrictEqual(
             Buffer.from([0x08, 0x96, 0x01, 0x10, 0x45]),
