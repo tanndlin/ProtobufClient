@@ -2,13 +2,14 @@ import ProtoMessageType from './ProtoMessageType';
 
 const messageType = new ProtoMessageType('TestMessage', [
     {
-        name: 'a',
-        id: 1,
-        type: 'float',
+        name: 'b',
+        id: 2,
+        type: 'string',
     },
 ]);
 
-const buffer = messageType.encode({ a: 1.25 });
-console.log(buffer); // Buffer: 0x08 0x03
+const buffer = Buffer.from([
+    0x12, 0x07, 0x74, 0x65, 0x73, 0x74, 0x69, 0x6e, 0x67,
+]);
 const decoded = messageType.decode(buffer);
-console.log(decoded);
+console.log(decoded); // { b: 'testing' }

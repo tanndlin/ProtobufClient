@@ -105,3 +105,11 @@ function decimalTo32BitIEEE754(value: number): number[] {
     }
     return bytes.reverse();
 }
+
+export function encodeLengthDelimited(
+    bytes: Buffer<ArrayBufferLike>,
+): number[] {
+    const length = bytes.length;
+    const lengthBuffer = encodeVarint(length, 'uint32');
+    return [...lengthBuffer, ...bytes.values()];
+}

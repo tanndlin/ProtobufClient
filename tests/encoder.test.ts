@@ -102,6 +102,20 @@ describe('Encoder Tests', () => {
             Buffer.from([0x0d, 0x00, 0x00, 0xa0, 0x3f]),
         );
     });
+
+    it('Should encode a string messsage field', () => {
+        const message = new ProtoMessageType('Test2`', [
+            {
+                type: 'string',
+                id: 2,
+                name: 'b',
+            },
+        ]);
+        const buffer = message.encode({ b: 'testing' });
+        expect(buffer).toStrictEqual(
+            Buffer.from([0x12, 0x07, 0x74, 0x65, 0x73, 0x74, 0x69, 0x6e, 0x67]),
+        );
+    });
 });
 
 describe('Encoder Helper Tests', () => {

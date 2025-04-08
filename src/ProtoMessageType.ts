@@ -1,5 +1,10 @@
 import { decodeVarint } from './decode';
-import { encodeFixed32, encodeFixed64, encodeVarint } from './encode';
+import {
+    encodeFixed32,
+    encodeFixed64,
+    encodeLengthDelimited,
+    encodeVarint,
+} from './encode';
 import { ProtoField, WireType } from './types';
 import { valueTypeToWireType } from './utils';
 
@@ -64,6 +69,13 @@ class ProtoMessageType<T> {
                 offset += 4;
                 result[field.name] = fixed32 as T[keyof T & string];
                 break;
+            case WireType.LengthDelimited:
+                const length = decodeVarint(buffer, offset, 'uint32').value;
+                offset++; // +1 for the length byte
+                let str = buffer.toString('utf-8', offset, offset + length);
+                result[field.name] = str as T[keyof T & string];
+                offset += length;
+                break;
             default:
                 throw new Error(
                     `Attempt to decode unimplemented wire type (type: ${field.type})`,
@@ -99,6 +111,19 @@ class ProtoMessageType<T> {
                 break;
             case WireType.Fixed32:
                 buffer.push(...encodeFixed32(value as number, field.type));
+                break;
+            case WireType.LengthDelimited:
+                let buff = Buffer.from([]);
+                switch (field.type) {
+                    case 'string':
+                        buff = Buffer.from(value as string, 'utf-8');
+                        break;
+                    default:
+                        throw new Error(
+                            `Attempt to encode unimplemented length-delimited type (type: ${field.type})`,
+                        );
+                }
+                buffer.push(...encodeLengthDelimited(buff));
                 break;
             default:
                 throw new Error(
