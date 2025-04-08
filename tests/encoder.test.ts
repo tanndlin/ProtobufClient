@@ -1,3 +1,4 @@
+import { encodeVarint } from '../src/encode';
 import ProtoMessageType from '../src/ProtoMessageType';
 
 describe('Encoder Tests', () => {
@@ -19,5 +20,37 @@ describe('Encoder Tests', () => {
         expect(buffer[0]).toBe(0x08); // field number 1, wire type 0 (varint)
         expect(buffer[1]).toBe(0x96); // 150 in varint encoding
         expect(buffer[2]).toBe(0x01); // continuation byte for varint
+    });
+
+    it('Should encode a message with 2 values', () => {
+        const message = new ProtoMessageType('Test1`', {
+            a: {
+                type: 'int32',
+                id: 1,
+                optional: true,
+                name: 'a',
+            },
+            b: {
+                type: 'int32',
+                id: 2,
+                optional: true,
+                name: 'b',
+            },
+        });
+        const buffer = message.encode({ a: 150, b: 69 });
+        expect(buffer).toStrictEqual(
+            Buffer.from([0x08, 0x96, 0x01, 0x10, 0x45]),
+        );
+    });
+});
+
+describe('Encoder Helper Tests', () => {
+    it.each([
+        [150, [0x96, 0x01]],
+        [300, [0xac, 0x02]],
+        [0, [0]],
+    ])('Should encode varint %d to %s', (value: number, expected: number[]) => {
+        const buffer = encodeVarint(value);
+        expect(buffer).toEqual(expected);
     });
 });

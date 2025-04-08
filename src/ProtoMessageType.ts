@@ -1,4 +1,6 @@
-import { ProtoField } from './types';
+import { encodeVarint } from './encode';
+import { ProtoField, WireType } from './types';
+import { valueTypeToWireType } from './utils';
 
 class ProtoMessageType<T> {
     constructor(
@@ -13,9 +15,30 @@ class ProtoMessageType<T> {
     }
 
     public encode(data: T): Buffer {
-        // Example encoding logic (to be replaced with actual implementation)
-        const jsonString = JSON.stringify(data);
-        return Buffer.from(jsonString, 'utf-8');
+        const buffer: number[] = [];
+
+        for (const key of Object.keys(this.fields)) {
+            const field = this.fields[key as keyof T & string];
+            const value = data[key as keyof T & string];
+
+            buffer.push(...this.encodeField(field, value));
+        }
+
+        return Buffer.from(buffer);
+    }
+
+    private encodeField(field: ProtoField, value: T[keyof T]): number[] {
+        const buffer: number[] = [];
+        const wireType = valueTypeToWireType(field.type);
+        buffer.push((field.id << 3) | wireType);
+
+        switch (wireType) {
+            case WireType.Varint: // Varint
+                buffer.push(...encodeVarint(value as number));
+                break;
+        }
+
+        return buffer;
     }
 }
 
