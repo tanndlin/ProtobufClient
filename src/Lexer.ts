@@ -1,12 +1,15 @@
-import { ValueType } from './types';
-type Keywords = 'message';
+import { isKeyword, isValueType } from './utils';
+
+export const keywords = ['message', 'optional'] as const;
+export type KeywordType = (typeof keywords)[number];
 
 type LexerTokenType =
-    | Keywords
+    | 'message'
+    | 'modifier'
     | 'identifier'
     | '='
     | ';'
-    | ValueType
+    | 'type'
     | '{'
     | '}'
     | 'number';
@@ -46,15 +49,25 @@ class Lexer {
             index++;
         }
 
-        const keywords = new Set([
-            'message',
-            'enum',
-            'service',
-            'rpc',
-            'syntax',
-        ]); // Add more keywords as needed
-        const type = keywords.has(identifier) ? identifier : 'identifier';
-        return new LexerToken(type as LexerTokenType, identifier);
+        if (isKeyword(identifier)) {
+            return this.handleKeyword(identifier);
+        } else if (isValueType(identifier)) {
+            return new LexerToken('type', identifier);
+        }
+
+        return new LexerToken('identifier', identifier);
+    }
+
+    private handleKeyword(identifier: string): LexerToken {
+        if (identifier === 'message') {
+            return new LexerToken('message', identifier);
+        } else if (identifier === 'optional') {
+            return new LexerToken('modifier', identifier);
+        } else if (isValueType(identifier)) {
+            return new LexerToken('type', identifier);
+        }
+
+        return new LexerToken('identifier', identifier);
     }
 
     public tokenize(): LexerToken[] {
@@ -72,16 +85,6 @@ class Lexer {
             if (char === '{' || char === '}' || char === '=' || char === ';') {
                 tokens.push(new LexerToken(char as LexerTokenType, char));
                 index++;
-            } else if (/\d/.test(char)) {
-                const numberToken = this.parseNumber(this.script, index);
-                tokens.push(numberToken);
-                index += numberToken.value.length;
-
-                // Check if the next character is a semicolon and add it as a separate token
-                if (index < this.script.length && this.script[index] === ';') {
-                    tokens.push(new LexerToken(';', ';'));
-                    index++;
-                }
             } else if (/[a-zA-Z_]/.test(char)) {
                 const identifierToken = this.parseIdentifierOrKeyword(
                     this.script,
@@ -89,6 +92,10 @@ class Lexer {
                 );
                 tokens.push(identifierToken);
                 index += identifierToken.value.length;
+            } else if (/\d/.test(char)) {
+                const numberToken = this.parseNumber(this.script, index);
+                tokens.push(numberToken);
+                index += numberToken.value.length;
             } else {
                 console.error(
                     `Unexpected character encountered: '${char}' at index ${index}`,
