@@ -107,14 +107,17 @@ describe('Encoder Helper Tests', () => {
     );
 
     it.each([
-        ['sint32' as const, 0, [0x00]],
-        ['sint32' as const, -1, [0x01]],
-        ['sint32' as const, 1, [0x02]],
-        ['sint32' as const, -2, [0x03]],
-        ['sint32' as const, 2, [0x04]],
+        ['sint32' as const, 0, 0],
+        ['sint32' as const, -1, 1],
+        ['sint32' as const, 1, 2],
+        ['sint32' as const, -2, 3],
+        ['sint32' as const, 2, 4],
+        ['sint32' as const, 0x7fffffff, 0xfffffffe],
+        ['sint32' as const, -0x80000000, 0xffffffff],
     ])(
-        'Should encode sint %d as to %s',
-        (valueType: ValueType, value: number, expected: number[]) => {
+        'Should encode %s %d as uint %d',
+        (valueType: ValueType, value: number, encodeAs: number) => {
+            const expected = encodeVarint(encodeAs, 'uint32');
             const buffer = encodeVarint(value, valueType);
             expect(buffer).toEqual(expected);
         },

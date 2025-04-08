@@ -5,11 +5,11 @@ const messageType = new ProtoMessageType('TestMessage', [
     {
         name: 'a',
         id: 1,
-        type: 'int32',
+        type: 'sint32',
     },
 ]);
 
-console.log(messageType.encode({ a: -2 }));
+console.log(messageType.encode({ a: 0x7fffffff }));
 
 const decoded = messageType.decode(buffer);
 console.log(decoded);
