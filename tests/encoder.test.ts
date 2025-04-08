@@ -42,6 +42,19 @@ describe('Encoder Tests', () => {
             Buffer.from([0x08, 0x96, 0x01, 0x10, 0x45]),
         );
     });
+
+    it('Should encode a bool field', () => {
+        //https://protobuf.dev/programming-guides/encoding/#simple
+        const message = new ProtoMessageType('Test1`', [
+            {
+                type: 'bool',
+                id: 1,
+                name: 'a',
+            },
+        ]);
+        const buffer = message.encode({ a: true });
+        expect(buffer).toStrictEqual(Buffer.from([0x08, 0x01]));
+    });
 });
 
 describe('Encoder Helper Tests', () => {

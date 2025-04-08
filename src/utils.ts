@@ -11,6 +11,7 @@ export function isKeyword(value: string): value is (typeof keywords)[number] {
 
 export function valueTypeToWireType(valueType: ValueType): WireType {
     switch (valueType) {
+        case 'bool':
         case 'int32':
             return WireType.Varint;
         case 'string':

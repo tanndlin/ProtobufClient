@@ -48,8 +48,12 @@ class ProtoMessageType<T> {
                     offset,
                 );
                 offset = newOffset;
-                result[field.name] = value as T[keyof T & string];
+                const coerced = (
+                    field.type === 'bool' ? value > 0 : value
+                ) as T[keyof T & string];
+                result[field.name] = coerced;
                 break;
+
             default:
                 throw new Error(
                     `Attempt to decode unimplemented wire type (type: ${field.type})`,

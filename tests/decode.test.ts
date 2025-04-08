@@ -39,6 +39,21 @@ describe('Decoder Tests', () => {
         expect(decoded).toHaveProperty('b');
         expect(decoded.b).toBe(69);
     });
+
+    it('Should decode a bool field', () => {
+        const buffer = Buffer.from([0x08, 0x01]);
+        const messageType = new ProtoMessageType('TestMessage', [
+            {
+                name: 'a',
+                id: 1,
+                type: 'bool',
+            },
+        ]);
+
+        const decoded = messageType.decode(buffer);
+        expect(decoded).toHaveProperty('a');
+        expect(decoded.a).toBe(true);
+    });
 });
 
 describe('Decode Helper Tests', () => {
