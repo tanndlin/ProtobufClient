@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "jest --watchAll --config ./jest.config.js",
+    "test": "jest --config ./jest.config.js",
+    "test:watch": "jest --watchAll --config ./jest.config.js",
     "build": "tsc -outDir build ",
     "lint": "eslint . --ext .ts",
     "watch": "nodemon -e ts,tan -w . -x npm run watch:serve",
@@ -15,6 +16,7 @@
     "@babel/preset-typescript": "7.27.0",
     "@types/jest": "^29.5.14",
     "@types/node": "^20.11.17",
+    "@types/socket.io": "^3.0.1",
     "@typescript-eslint/eslint-plugin": "^7.18.0",
     "@typescript-eslint/parser": "^7.18.0",
     "babel-jest": "^29.7.0",
@@ -28,5 +30,8 @@
     "ts-jest": "^29.1.2",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.2"
+  },
+  "dependencies": {
+    "socket.io-client": "^4.8.1"
   }
 }
