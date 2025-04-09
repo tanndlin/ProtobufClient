@@ -24,14 +24,13 @@ export function encodeVarint(value: number, valueType: ValueType): number[] {
 }
 
 function encodeNegative(value: number, valueType: ValueType): number[] {
-    switch (valueType) {
-        case 'uint32':
-            throw new Error(`Cannot encode negative as uint (value: ${value})`);
-        case 'int32':
-            return encodeNegativeInt(value);
-        default:
-            throw new Error(`Unxepected valueType: (type: ${valueType})`);
+    if (!(valueType === 'int32' || valueType === 'int64')) {
+        throw new Error(
+            `Unxepected valueType. Cannot encode negative value for (type: ${valueType})`,
+        );
     }
+
+    return encodeNegativeInt(value);
 }
 
 function encodeNegativeInt(value: number): number[] {

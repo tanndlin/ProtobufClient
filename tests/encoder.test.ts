@@ -140,6 +140,11 @@ describe('Encoder Helper Tests', () => {
             -2,
             [0xfe, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x01],
         ],
+        [
+            'int64' as const,
+            -2,
+            [0xfe, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x01],
+        ],
     ])(
         'Should encode %s %d to %s',
         (valueType: ValueType, value: number, expected: number[]) => {
@@ -167,7 +172,7 @@ describe('Encoder Helper Tests', () => {
 
     it('Should throw for encoding negative uint', () => {
         expect(() => encodeVarint(-1, 'uint32')).toThrow(
-            'Cannot encode negative as uint (value: -1)',
+            'Unxepected valueType. Cannot encode negative value for (type: uint32)',
         );
     });
 });

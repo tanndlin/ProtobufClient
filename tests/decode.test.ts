@@ -18,6 +18,22 @@ describe('Decoder Tests', () => {
         expect(decoded.a).toBe(150);
     });
 
+    it('Should decode an int64', () => {
+        //https://protobuf.dev/programming-guides/encoding/#simple
+        const buffer = Buffer.from([0x08, 0x96, 0x01]); // field number 1, wire type 0 (varint)
+        const messageType = new ProtoMessageType<{ a: number }>('TestMessage', [
+            {
+                name: 'a',
+                id: 1,
+                type: 'int64',
+            },
+        ]);
+
+        const decoded = messageType.decode(buffer);
+        expect(decoded).toHaveProperty('a');
+        expect(decoded.a).toBe(150);
+    });
+
     it('Should decode a message with 2 fields', () => {
         const buffer = Buffer.from([0x08, 0x96, 0x01, 0x10, 0x45]);
         const messageType = new ProtoMessageType('TestMessage', [

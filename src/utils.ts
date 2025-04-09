@@ -13,6 +13,7 @@ export function valueTypeToWireType(valueType: ValueType): WireType {
     switch (valueType) {
         case 'bool':
         case 'int32':
+        case 'int64':
         case 'sint32':
         case 'uint32':
             return WireType.Varint;
