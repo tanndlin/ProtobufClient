@@ -57,23 +57,63 @@ describe('Encoder Tests', () => {
         expect(buffer).toStrictEqual(Buffer.from([0x08, 0x01]));
     });
 
-    it('Should encode a negative sint32', () => {
-        //https://protobuf.dev/programming-guides/encoding/#simple
-        const message = new ProtoMessageType('Test1`', [
-            {
-                type: 'int32',
-                id: 1,
-                name: 'a',
-            },
-        ]);
-        const buffer = message.encode({ a: -2 });
-        expect(buffer).toStrictEqual(
-            Buffer.from([
-                0x08, 0xfe, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
-                0x01,
-            ]),
-        );
-    });
+    it.each([
+        [-2, [0x08, 0x03]],
+        [-101, [0x08, 0xc9, 0x01]],
+        [0, [0x08, 0x00]],
+        [1, [0x08, 0x02]],
+        [2, [0x08, 0x04]],
+        [3, [0x08, 0x06]],
+        [4, [0x08, 0x08]],
+        [5, [0x08, 0x0a]],
+        [6, [0x08, 0x0c]],
+        [7, [0x08, 0x0e]],
+        [8, [0x08, 0x10]],
+        [-1024, [0x08, 0xff, 0x0f]],
+        [1024, [0x08, 0x80, 0x10]],
+        [-0x80000000, [0x08, 0xff, 0xff, 0xff, 0xff, 0x0f]],
+    ])(
+        'Should encode an sint32 %d to %s',
+        (value: number, expected: number[]) => {
+            const message = new ProtoMessageType('Test1`', [
+                {
+                    type: 'sint32',
+                    id: 1,
+                    name: 'a',
+                },
+            ]);
+            const buffer = message.encode({ a: value });
+            expect(buffer).toStrictEqual(Buffer.from(expected));
+        },
+    );
+
+    it.each([
+        [-2, [0x08, 0x03]],
+        [-101, [0x08, 0xc9, 0x01]],
+        [0, [0x08, 0x00]],
+        [1, [0x08, 0x02]],
+        [2, [0x08, 0x04]],
+        [6, [0x08, 0x0c]],
+        [7, [0x08, 0x0e]],
+        [8, [0x08, 0x10]],
+        [-1024, [0x08, 0xff, 0x0f]],
+        [1024, [0x08, 0x80, 0x10]],
+        [-0x80000000, [0x08, 0xff, 0xff, 0xff, 0xff, 0x0f]],
+        [-99999999999, [0x08, 0xfd, 0x9f, 0xb7, 0x87, 0x09]],
+    ])(
+        'Should encode an sint64 %d to %s',
+        (value: number, expected: number[]) => {
+            const message = new ProtoMessageType('Test1`', [
+                {
+                    type: 'sint64',
+                    id: 1,
+                    name: 'a',
+                },
+            ]);
+            const buffer = message.encode({ a: value });
+            expect(buffer).toStrictEqual(Buffer.from(expected));
+        },
+    );
 
     it('Should encode a double messsage field', () => {
         const message = new ProtoMessageType('Test1`', [
@@ -145,6 +185,7 @@ describe('Encoder Helper Tests', () => {
             -2,
             [0xfe, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x01],
         ],
+        ['int64' as const, 199999999997, [0xfd, 0x9f, 0xb7, 0x87, 0xe9, 0x05]],
     ])(
         'Should encode %s %d to %s',
         (valueType: ValueType, value: number, expected: number[]) => {

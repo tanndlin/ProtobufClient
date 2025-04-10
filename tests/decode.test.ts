@@ -136,6 +136,52 @@ describe('Decoder Tests', () => {
         expect(decoded).toHaveProperty('b');
         expect(decoded.b).toBe('testing');
     });
+
+    it.each([
+        [[0x08, 0x03], -2],
+        [[0x08, 0xc9, 0x01], -101],
+        [[0x08, 0x00], 0],
+        [[0x08, 0x02], 1],
+        [[0x08, 0x04], 2],
+        [[0x08, 0x0c], 6],
+        [[0x08, 0x0e], 7],
+        [[0x08, 0x10], 8],
+        [[0x08, 0xff, 0x0f], -1024],
+        [[0x08, 0x80, 0x10], 1024],
+        [[0x08, 0xff, 0xff, 0xff, 0xff, 0x0f], -0x80000000],
+        [[0x08, 0xfd, 0x9f, 0xb7, 0x87, 0xe9, 0x05], -99999999999],
+    ])(
+        'Should decode an sint64 %s to %d',
+        (buffer: number[], expected: number) => {
+            const message = new ProtoMessageType('Test1`', [
+                {
+                    type: 'sint64',
+                    id: 1,
+                    name: 'a',
+                },
+            ]);
+            const decoded = message.decode(Buffer.from(buffer));
+            expect(decoded).toHaveProperty('a');
+            expect(decoded.a).toBe(expected);
+        },
+    );
+
+    it.each([-99999999999, 1, 2, 3, 4, 5, -6])(
+        'Should encode then decode sint64 %d',
+        (value: number) => {
+            const message = new ProtoMessageType('Test1`', [
+                {
+                    type: 'sint64',
+                    id: 1,
+                    name: 'a',
+                },
+            ]);
+            const encoded = message.encode({ a: value });
+            const decoded = message.decode(encoded);
+            expect(decoded).toHaveProperty('a');
+            expect(decoded.a).toBe(value);
+        },
+    );
 });
 
 describe('Decode Helper Tests', () => {
@@ -157,7 +203,7 @@ describe('Decode Helper Tests', () => {
         [[0x05], -3],
         [[0x07], -4],
         [[0x09], -5],
-    ])('Should decode negative sint %d from a buffer', (input, expected) => {
+    ])('Should decode negative sint32 %d from a buffer', (input, expected) => {
         const buffer = Buffer.from(input);
         expect(decodeVarint(buffer, 0, 'sint32').value).toBe(expected);
     });
@@ -168,7 +214,7 @@ describe('Decode Helper Tests', () => {
         [[0x06], 3],
         [[0x08], 4],
         [[0x0a], 5],
-    ])('Should decode positive sint %d from a buffer', (input, expected) => {
+    ])('Should decode positive sint32 %d from a buffer', (input, expected) => {
         const buffer = Buffer.from(input);
         expect(decodeVarint(buffer, 0, 'sint32').value).toBe(expected);
     });

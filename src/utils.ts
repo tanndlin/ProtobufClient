@@ -15,6 +15,7 @@ export function valueTypeToWireType(valueType: ValueType): WireType {
         case 'int32':
         case 'int64':
         case 'sint32':
+        case 'sint64':
         case 'uint32':
             return WireType.Varint;
         case 'double':

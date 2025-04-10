@@ -23,8 +23,8 @@ export function decodeVarint(
         value |= (bigEndian[i] & 0x7f) << (7 * (bigEndian.length - 1 - i));
     }
 
-    if (valueType === 'sint32') {
-        // Decode zigzag encoding for sint32
+    if (valueType === 'sint32' || valueType === 'sint64') {
+        // Decode zigzag encoding for sint32 and sint64
         const signBit = value & 1;
         value = value >> 1;
         if (signBit) {

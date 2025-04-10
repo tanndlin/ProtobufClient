@@ -2,11 +2,11 @@ import { ValueType } from './types';
 import { to64Bit } from './utils';
 
 export function encodeVarint(value: number, valueType: ValueType): number[] {
-    if (value < 0 && valueType !== 'sint32') {
+    if (value < 0 && valueType !== 'sint32' && valueType !== 'sint64') {
         return encodeNegative(value, valueType);
     }
 
-    if (valueType === 'sint32') {
+    if (valueType === 'sint32' || valueType === 'sint64') {
         if (value < 0) {
             value = -value * 2 - 1;
         } else {
@@ -19,6 +19,7 @@ export function encodeVarint(value: number, valueType: ValueType): number[] {
         buffer.push((value & 0x7f) | 0x80);
         value >>>= 7;
     }
+
     buffer.push(value & 0x7f);
     return buffer;
 }
