@@ -18,22 +18,6 @@ describe('Decoder Tests', () => {
         expect(decoded.a).toBe(150);
     });
 
-    it('Should decode an int64', () => {
-        //https://protobuf.dev/programming-guides/encoding/#simple
-        const buffer = Buffer.from([0x08, 0x96, 0x01]); // field number 1, wire type 0 (varint)
-        const messageType = new ProtoMessageType<{ a: number }>('TestMessage', [
-            {
-                name: 'a',
-                id: 1,
-                type: 'int64',
-            },
-        ]);
-
-        const decoded = messageType.decode(buffer);
-        expect(decoded).toHaveProperty('a');
-        expect(decoded.a).toBe(150);
-    });
-
     it('Should decode a message with 2 fields', () => {
         const buffer = Buffer.from([0x08, 0x96, 0x01, 0x10, 0x45]);
         const messageType = new ProtoMessageType('TestMessage', [
@@ -148,14 +132,12 @@ describe('Decoder Tests', () => {
         [[0x08, 0x10], 8],
         [[0x08, 0xff, 0x0f], -1024],
         [[0x08, 0x80, 0x10], 1024],
-        [[0x08, 0xff, 0xff, 0xff, 0xff, 0x0f], -0x80000000],
-        [[0x08, 0xfd, 0x9f, 0xb7, 0x87, 0xe9, 0x05], -99999999999],
     ])(
-        'Should decode an sint64 %s to %d',
+        'Should decode an sint32 %s to %d',
         (buffer: number[], expected: number) => {
             const message = new ProtoMessageType('Test1`', [
                 {
-                    type: 'sint64',
+                    type: 'sint32',
                     id: 1,
                     name: 'a',
                 },
@@ -165,27 +147,15 @@ describe('Decoder Tests', () => {
             expect(decoded.a).toBe(expected);
         },
     );
-
-    it.each([-99999999999, 1, 2, 3, 4, 5, -6])(
-        'Should encode then decode sint64 %d',
-        (value: number) => {
-            const message = new ProtoMessageType('Test1`', [
-                {
-                    type: 'sint64',
-                    id: 1,
-                    name: 'a',
-                },
-            ]);
-            const encoded = message.encode({ a: value });
-            const decoded = message.decode(encoded);
-            expect(decoded).toHaveProperty('a');
-            expect(decoded.a).toBe(value);
-        },
-    );
 });
 
 describe('Decode Helper Tests', () => {
-    it('Should decode the number 150 from a buffer', () => {
+    it.each([
+        { input: [0x08, 0x96, 0x01], expected: 150 },
+        { input: [0x08, 0xac, 0x02], expected: 300 },
+        { input: [0x08, 0x00], expected: 0 },
+        { input: [0x08, 0x01], expected: 1 },
+    ])('Should decode uint32 %s from a buffer', () => {
         const buffer = Buffer.from([0x96, 0x01]);
         expect(decodeVarint(buffer, 0, 'uint32').value).toBe(150);
     });

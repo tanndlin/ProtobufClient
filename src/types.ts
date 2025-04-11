@@ -1,9 +1,7 @@
 export const ValueTypes = [
     'int32',
-    'int64',
     'uint32',
     'sint32',
-    'sint64',
     'float',
     'double',
     'string',

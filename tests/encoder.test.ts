@@ -57,6 +57,32 @@ describe('Encoder Tests', () => {
         expect(buffer).toStrictEqual(Buffer.from([0x08, 0x01]));
     });
 
+    it('Should encode a uint32 field', () => {
+        const message = new ProtoMessageType('TestMessage', [
+            {
+                type: 'uint32',
+                id: 1,
+                name: 'a',
+            },
+        ]);
+        const buffer = message.encode({ a: 4294967295 }); // Max uint32
+        expect(buffer).toStrictEqual(
+            Buffer.from([0x08, 0xff, 0xff, 0xff, 0xff, 0x0f]),
+        );
+    });
+
+    it('Should encode a bool field (false)', () => {
+        const message = new ProtoMessageType('TestMessage', [
+            {
+                type: 'bool',
+                id: 1,
+                name: 'a',
+            },
+        ]);
+        const buffer = message.encode({ a: false });
+        expect(buffer).toStrictEqual(Buffer.from([0x08, 0x00]));
+    });
+
     it.each([
         [-2, [0x08, 0x03]],
         [-101, [0x08, 0xc9, 0x01]],
@@ -105,7 +131,7 @@ describe('Encoder Tests', () => {
         (value: number, expected: number[]) => {
             const message = new ProtoMessageType('Test1`', [
                 {
-                    type: 'sint64',
+                    type: 'sint32',
                     id: 1,
                     name: 'a',
                 },
@@ -156,6 +182,23 @@ describe('Encoder Tests', () => {
             Buffer.from([0x12, 0x07, 0x74, 0x65, 0x73, 0x74, 0x69, 0x6e, 0x67]),
         );
     });
+
+    it('Should encode a string field with special characters', () => {
+        const message = new ProtoMessageType('TestMessage', [
+            {
+                type: 'string',
+                id: 1,
+                name: 'a',
+            },
+        ]);
+        const buffer = message.encode({ a: 'Hello, 世界!' });
+        expect(buffer).toStrictEqual(
+            Buffer.from([
+                0x0a, 0x0e, 0x48, 0x65, 0x6c, 0x6c, 0x6f, 0x2c, 0x20, 0xe4,
+                0xb8, 0x96, 0xe7, 0x95, 0x8c, 0x21,
+            ]),
+        );
+    });
 });
 
 describe('Encoder Helper Tests', () => {
@@ -180,12 +223,6 @@ describe('Encoder Helper Tests', () => {
             -2,
             [0xfe, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x01],
         ],
-        [
-            'int64' as const,
-            -2,
-            [0xfe, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x01],
-        ],
-        ['int64' as const, 199999999997, [0xfd, 0x9f, 0xb7, 0x87, 0xe9, 0x05]],
     ])(
         'Should encode %s %d to %s',
         (valueType: ValueType, value: number, expected: number[]) => {

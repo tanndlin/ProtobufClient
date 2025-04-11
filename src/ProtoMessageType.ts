@@ -14,12 +14,6 @@ class ProtoMessageType<T> {
         public fields: ProtoField<T>[],
     ) {}
 
-    public GenerateTypeScript(): string {
-        return `export interface ${this.name} {\n${Object.entries(this.fields)
-            .map(([key, value]) => `    ${key}: ${value};`)
-            .join('\n')}\n}`;
-    }
-
     public decode(buffer: Buffer): T {
         const result: Partial<T> = {};
         let offset = 0;
@@ -113,17 +107,16 @@ class ProtoMessageType<T> {
                 buffer.push(...encodeFixed32(value as number, field.type));
                 break;
             case WireType.LengthDelimited:
-                let buff = Buffer.from([]);
                 switch (field.type) {
                     case 'string':
-                        buff = Buffer.from(value as string, 'utf-8');
+                        const buff = Buffer.from(value as string, 'utf-8');
+                        buffer.push(...encodeLengthDelimited(buff));
                         break;
                     default:
                         throw new Error(
                             `Attempt to encode unimplemented length-delimited type (type: ${field.type})`,
                         );
                 }
-                buffer.push(...encodeLengthDelimited(buff));
                 break;
             default:
                 throw new Error(

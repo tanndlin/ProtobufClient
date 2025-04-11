@@ -44,14 +44,14 @@ class Parser {
         this.advance();
         this.expectToken('{');
 
-        const fields: Record<string, ProtoField> = {};
+        const fields = [];
 
         while (this.getCurrentToken()?.type !== '}') {
             if (!this.getCurrentToken()) {
                 throw new Error('Unexpected end of input while parsing fields');
             }
-            const field = this.parseField(fieldNames, fieldNumbers);
-            fields[field.name] = field;
+
+            fields.push(this.parseField(fieldNames, fieldNumbers));
         }
 
         this.expectToken('}');
@@ -61,7 +61,7 @@ class Parser {
     private parseField(
         fieldNames: Set<string>,
         fieldNumbers: Set<number>,
-    ): ProtoField {
+    ): ProtoField<any> {
         const nextToken = this.getCurrentToken();
         if (!nextToken) {
             throw new Error('Expected field declaration');

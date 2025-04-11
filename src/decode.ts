@@ -20,11 +20,14 @@ export function decodeVarint(
     const bigEndian = bytes.reverse();
     // Concat the bits into a single number
     for (let i = 0; i < bigEndian.length; i++) {
-        value |= (bigEndian[i] & 0x7f) << (7 * (bigEndian.length - 1 - i));
+        value |= bigEndian[i] & 0x7f;
+        if (i < bigEndian.length - 1) {
+            value <<= 7;
+        }
     }
 
-    if (valueType === 'sint32' || valueType === 'sint64') {
-        // Decode zigzag encoding for sint32 and sint64
+    if (valueType === 'sint32') {
+        // Decode zigzag encoding for sint32
         const signBit = value & 1;
         value = value >> 1;
         if (signBit) {

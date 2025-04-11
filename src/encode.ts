@@ -2,11 +2,11 @@ import { ValueType } from './types';
 import { to64Bit } from './utils';
 
 export function encodeVarint(value: number, valueType: ValueType): number[] {
-    if (value < 0 && valueType !== 'sint32' && valueType !== 'sint64') {
+    if (value < 0 && valueType !== 'sint32') {
         return encodeNegative(value, valueType);
     }
 
-    if (valueType === 'sint32' || valueType === 'sint64') {
+    if (valueType === 'sint32') {
         if (value < 0) {
             value = -value * 2 - 1;
         } else {
@@ -25,7 +25,7 @@ export function encodeVarint(value: number, valueType: ValueType): number[] {
 }
 
 function encodeNegative(value: number, valueType: ValueType): number[] {
-    if (!(valueType === 'int32' || valueType === 'int64')) {
+    if (!(valueType === 'int32')) {
         throw new Error(
             `Unxepected valueType. Cannot encode negative value for (type: ${valueType})`,
         );
@@ -106,9 +106,7 @@ function decimalTo32BitIEEE754(value: number): number[] {
     return bytes.reverse();
 }
 
-export function encodeLengthDelimited(
-    bytes: Buffer<ArrayBufferLike>,
-): number[] {
+export function encodeLengthDelimited(bytes: Uint8Array): number[] {
     const length = bytes.length;
     const lengthBuffer = encodeVarint(length, 'uint32');
     return [...lengthBuffer, ...bytes.values()];

@@ -16,10 +16,10 @@ describe('Parser', () => {
 
         expect(result).toBeInstanceOf(ProtoMessageType);
         expect(result.name).toBe('TestMessage');
-        expect(result.fields).toEqual({
-            field1: { type: 'string', name: 'field1', id: 1, optional: false },
-            field2: { type: 'int32', name: 'field2', id: 2, optional: false },
-        } as ProtoMessageType<any>['fields']);
+        expect(result.fields).toEqual([
+            { type: 'string', name: 'field1', id: 1, optional: false },
+            { type: 'int32', name: 'field2', id: 2, optional: false },
+        ]);
     });
 
     it('should throw an error for duplicate field names', () => {
