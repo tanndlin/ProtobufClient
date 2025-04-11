@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+message TestMessage {
+    optional int32 int32         = 1;
+    optional uint32 uint32       = 2;
+    optional sint32 sint32       = 3;
+    optional float float         = 4;
+    optional double double       = 5;
+    optional string string       = 6;
+    repeated int32 repeatedInt32 = 7;
+}

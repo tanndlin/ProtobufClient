@@ -8,12 +8,15 @@
     "build": "tsc -outDir build ",
     "lint": "eslint . --ext .ts",
     "watch": "nodemon -e ts,tan -w . -x npm run watch:serve",
-    "watch:serve": "node -r ts-node/register --inspect src/index.ts"
+    "watch:serve": "node -r ts-node/register --inspect src/index.ts",
+    "generate": "protoc --ts_out generated --proto_path generated benchmark.proto"
   },
   "author": "tanndlin",
   "license": "ISC",
   "devDependencies": {
     "@babel/preset-typescript": "7.27.0",
+    "@protobuf-ts/plugin": "^2.9.6",
+    "@protobuf-ts/runtime": "^2.9.6",
     "@types/jest": "^29.5.14",
     "@types/node": "^20.11.17",
     "@types/socket.io": "^3.0.1",

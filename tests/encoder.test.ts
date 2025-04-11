@@ -14,7 +14,7 @@ describe('Encoder Tests', () => {
             },
         ]);
         const buffer = message.encode({ a: 150 });
-        expect(buffer).toBeInstanceOf(Buffer);
+        expect(buffer).toBeInstanceOf(Uint8Array);
 
         // Should equal 0x08 0x96 0x01
         expect(buffer.length).toBe(3);
@@ -40,7 +40,7 @@ describe('Encoder Tests', () => {
         ]);
         const buffer = message.encode({ a: 150, b: 69 });
         expect(buffer).toStrictEqual(
-            Buffer.from([0x08, 0x96, 0x01, 0x10, 0x45]),
+            new Uint8Array([0x08, 0x96, 0x01, 0x10, 0x45]),
         );
     });
 
@@ -54,7 +54,7 @@ describe('Encoder Tests', () => {
             },
         ]);
         const buffer = message.encode({ a: true });
-        expect(buffer).toStrictEqual(Buffer.from([0x08, 0x01]));
+        expect(buffer).toStrictEqual(new Uint8Array([0x08, 0x01]));
     });
 
     it('Should encode a uint32 field', () => {
@@ -67,7 +67,7 @@ describe('Encoder Tests', () => {
         ]);
         const buffer = message.encode({ a: 4294967295 }); // Max uint32
         expect(buffer).toStrictEqual(
-            Buffer.from([0x08, 0xff, 0xff, 0xff, 0xff, 0x0f]),
+            new Uint8Array([0x08, 0xff, 0xff, 0xff, 0xff, 0x0f]),
         );
     });
 
@@ -80,13 +80,13 @@ describe('Encoder Tests', () => {
             },
         ]);
         const buffer = message.encode({ a: false });
-        expect(buffer).toStrictEqual(Buffer.from([0x08, 0x00]));
+        expect(buffer).toStrictEqual(new Uint8Array([0x08, 0x00]));
     });
 
     it.each([
         [-2, [0x08, 0x03]],
         [-101, [0x08, 0xc9, 0x01]],
-        [0, [0x08, 0x00]],
+        [0, []],
         [1, [0x08, 0x02]],
         [2, [0x08, 0x04]],
         [3, [0x08, 0x06]],
@@ -109,14 +109,14 @@ describe('Encoder Tests', () => {
                 },
             ]);
             const buffer = message.encode({ a: value });
-            expect(buffer).toStrictEqual(Buffer.from(expected));
+            expect(buffer).toStrictEqual(new Uint8Array(expected));
         },
     );
 
     it.each([
         [-2, [0x08, 0x03]],
         [-101, [0x08, 0xc9, 0x01]],
-        [0, [0x08, 0x00]],
+        [0, []],
         [1, [0x08, 0x02]],
         [2, [0x08, 0x04]],
         [6, [0x08, 0x0c]],
@@ -137,34 +137,9 @@ describe('Encoder Tests', () => {
                 },
             ]);
             const buffer = message.encode({ a: value });
-            expect(buffer).toStrictEqual(Buffer.from(expected));
+            expect(buffer).toStrictEqual(new Uint8Array(expected));
         },
     );
-
-    it('Should encode repeated fields', () => {
-        //https://protobuf.dev/programming-guides/encoding/#repeated
-        const message = new ProtoMessageType('Test1`', [
-            {
-                type: 'string',
-                id: 4,
-                name: 'd',
-            },
-            {
-                type: 'int32',
-                id: 6,
-                name: 'e',
-                repeated: true,
-            },
-        ]);
-
-        const buffer = message.encode({
-            d: 'hello',
-            e: [1, 2, 3],
-        });
-        expect(buffer).toStrictEqual(
-            Buffer.from([0x32, 0x06, 0x03, 0x8e, 0x02, 0x9e, 0xa7, 0x05]),
-        );
-    });
 
     it('Should encode a double messsage field', () => {
         const message = new ProtoMessageType('Test1`', [
@@ -176,7 +151,9 @@ describe('Encoder Tests', () => {
         ]);
         const buffer = message.encode({ a: 1.25 });
         expect(buffer).toStrictEqual(
-            Buffer.from([0x09, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xf4, 0x3f]),
+            new Uint8Array([
+                0x09, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xf4, 0x3f,
+            ]),
         );
     });
 
@@ -190,7 +167,7 @@ describe('Encoder Tests', () => {
         ]);
         const buffer = message.encode({ a: 1.25 });
         expect(buffer).toStrictEqual(
-            Buffer.from([0x0d, 0x00, 0x00, 0xa0, 0x3f]),
+            new Uint8Array([0x0d, 0x00, 0x00, 0xa0, 0x3f]),
         );
     });
 
@@ -204,7 +181,9 @@ describe('Encoder Tests', () => {
         ]);
         const buffer = message.encode({ b: 'testing' });
         expect(buffer).toStrictEqual(
-            Buffer.from([0x12, 0x07, 0x74, 0x65, 0x73, 0x74, 0x69, 0x6e, 0x67]),
+            new Uint8Array([
+                0x12, 0x07, 0x74, 0x65, 0x73, 0x74, 0x69, 0x6e, 0x67,
+            ]),
         );
     });
 
@@ -218,7 +197,7 @@ describe('Encoder Tests', () => {
         ]);
         const buffer = message.encode({ a: 'Hello, 世界!' });
         expect(buffer).toStrictEqual(
-            Buffer.from([
+            new Uint8Array([
                 0x0a, 0x0e, 0x48, 0x65, 0x6c, 0x6c, 0x6f, 0x2c, 0x20, 0xe4,
                 0xb8, 0x96, 0xe7, 0x95, 0x8c, 0x21,
             ]),

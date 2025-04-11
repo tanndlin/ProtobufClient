@@ -3,7 +3,7 @@ import { encodeRepeated, encodeValue } from './encode';
 import { ProtoField, WireType } from './types';
 import { valueTypeToWireType } from './utils';
 
-class ProtoMessageType<T> {
+class ProtoMessageType<T extends { [key: string]: T[keyof T] }> {
     constructor(
         public name: string,
         public fields: ProtoField<T>[],
@@ -78,16 +78,29 @@ class ProtoMessageType<T> {
         return offset;
     }
 
-    public encode(data: T): Buffer {
+    public encode(data: Partial<T>): Uint8Array {
         const buffer: number[] = [];
 
-        for (const field of this.fields) {
-            const value = data[field.name as keyof T];
+        for (const key of Object.keys(data)) {
+            const value = data[key as keyof T]!;
+            const field = this.fields.find((f) => f.name === key);
+            if (!field) {
+                throw new Error(`Unknown field name. (key: ${key})`);
+            }
+
+            // Special case for 0. Does not need to be encoded
+            if (
+                valueTypeToWireType(field) === WireType.Varint &&
+                value === 0 &&
+                !field.optional
+            ) {
+                continue;
+            }
 
             buffer.push(...this.encodeField(field, value));
         }
 
-        return Buffer.from(buffer);
+        return new Uint8Array(buffer);
     }
 
     private encodeField(field: ProtoField<T>, value: T[keyof T]): number[] {

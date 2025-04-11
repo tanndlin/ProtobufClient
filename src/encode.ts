@@ -84,10 +84,6 @@ export function encodeFixed64(value: number, valueType: ValueType): number[] {
         return decimalTo64bitIEEE754(value);
     }
 
-    if (valueType === 'float') {
-        return decimalTo32BitIEEE754(value);
-    }
-
     const buffer = [];
     for (let i = 0; i < 8; i++) {
         buffer.push(value & 0xff);
