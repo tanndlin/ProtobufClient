@@ -1,14 +1,22 @@
 import ProtoMessageType from './ProtoMessageType';
 
-const messageType = new ProtoMessageType('TestMessage', [
+//https://protobuf.dev/programming-guides/encoding/#repeated
+const message = new ProtoMessageType('Test1`', [
     {
-        name: 'a',
-        id: 1,
+        type: 'string',
+        id: 4,
+        name: 'd',
+    },
+    {
         type: 'int32',
+        id: 6,
+        name: 'e',
+        repeated: true,
     },
 ]);
 
-const encoded = messageType.encode({ a: -15 });
-console.log(encoded);
-const decoded = messageType.decode(encoded);
-console.log(decoded); // { b: 'testing' }
+const buffer = message.encode({
+    d: 'hello',
+    e: [1, 2, 3],
+});
+console.log(buffer);

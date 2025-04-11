@@ -1,5 +1,34 @@
-import { ValueType } from './types';
-import { to64Bit } from './utils';
+import { ProtoField, ValueType, WireType } from './types';
+import { to64Bit, valueTypeToWireType } from './utils';
+
+export function encodeValue<T>(field: ProtoField<T>, value: T[keyof T]) {
+    const wireType = valueTypeToWireType(field);
+
+    switch (wireType) {
+        case WireType.Varint:
+            return encodeVarint(value as number, field.type);
+        case WireType.Fixed64:
+            return encodeFixed64(value as number, field.type);
+        case WireType.Fixed32:
+            return encodeFixed32(value as number, field.type);
+        case WireType.LengthDelimited:
+            switch (field.type) {
+                case 'int32':
+                    return encodeVarint(value as number, field.type);
+                case 'string':
+                    const buff = Buffer.from(value as string, 'utf-8');
+                    return encodeLengthDelimited(buff);
+                default:
+                    throw new Error(
+                        `Attempt to encode unimplemented length-delimited type (type: ${field.type})`,
+                    );
+            }
+        default:
+            throw new Error(
+                `Attempt to encode unimplemented wire type (type: ${field.type})`,
+            );
+    }
+}
 
 export function encodeVarint(value: number, valueType: ValueType): number[] {
     if (value < 0 && valueType !== 'sint32') {
@@ -110,4 +139,38 @@ export function encodeLengthDelimited(bytes: Uint8Array): number[] {
     const length = bytes.length;
     const lengthBuffer = encodeVarint(length, 'uint32');
     return [...lengthBuffer, ...bytes.values()];
+}
+
+export function encodeRepeated<T>(
+    field: ProtoField<T>,
+    value: T[keyof T],
+): number[] {
+    const buffer: number[] = [];
+
+    if (!Array.isArray(value)) {
+        throw new Error(`Field ${field.name} is not an array`);
+    }
+
+    for (const item of value) {
+        buffer.push(...encodeVarint(item as number, field.type));
+    }
+
+    const bytes = encodePackedRepeated(field, value);
+    buffer.push(...encodeVarint(bytes.length, 'int32'));
+    buffer.push(...bytes);
+
+    return buffer;
+}
+
+export function encodePackedRepeated<T>(
+    field: ProtoField<T>,
+    values: T[keyof T][],
+): number[] {
+    // TODO - pack values
+    const buffer = [];
+    for (const value of values) {
+        buffer.push(...encodeValue(field, value));
+    }
+
+    return buffer;
 }

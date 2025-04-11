@@ -1,10 +1,5 @@
 import { decodeVarint } from './decode';
-import {
-    encodeFixed32,
-    encodeFixed64,
-    encodeLengthDelimited,
-    encodeVarint,
-} from './encode';
+import { encodeRepeated, encodeValue } from './encode';
 import { ProtoField, WireType } from './types';
 import { valueTypeToWireType } from './utils';
 
@@ -33,11 +28,15 @@ class ProtoMessageType<T> {
             throw new Error(`Unknown field id (id: ${fieldNumber}`);
         }
 
-        const expectedWireType = valueTypeToWireType(field.type) as WireType;
+        const expectedWireType = valueTypeToWireType(field) as WireType;
         if (expectedWireType !== wireType) {
             throw new Error(
                 `Decoded wire type (${wireType}) did not match (expected: ${expectedWireType})`,
             );
+        }
+
+        if (field.repeated) {
+            throw new Error('Repeated fields are not supported yet');
         }
 
         switch (wireType) {
@@ -93,38 +92,14 @@ class ProtoMessageType<T> {
 
     private encodeField(field: ProtoField<T>, value: T[keyof T]): number[] {
         const buffer: number[] = [];
-        const wireType = valueTypeToWireType(field.type);
+        const wireType = valueTypeToWireType(field);
         buffer.push((field.id << 3) | wireType);
 
-        switch (wireType) {
-            case WireType.Varint:
-                buffer.push(...encodeVarint(value as number, field.type));
-                break;
-            case WireType.Fixed64:
-                buffer.push(...encodeFixed64(value as number, field.type));
-                break;
-            case WireType.Fixed32:
-                buffer.push(...encodeFixed32(value as number, field.type));
-                break;
-            case WireType.LengthDelimited:
-                switch (field.type) {
-                    case 'string':
-                        const buff = Buffer.from(value as string, 'utf-8');
-                        buffer.push(...encodeLengthDelimited(buff));
-                        break;
-                    default:
-                        throw new Error(
-                            `Attempt to encode unimplemented length-delimited type (type: ${field.type})`,
-                        );
-                }
-                break;
-            default:
-                throw new Error(
-                    `Attempt to encode unimplemented wire type (type: ${field.type})`,
-                );
+        if (field.repeated) {
+            return [...buffer, ...encodeRepeated(field, value as T[keyof T])];
         }
 
-        return buffer;
+        return [...buffer, ...encodeValue(field, value)];
     }
 }
 

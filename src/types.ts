@@ -14,6 +14,7 @@ export type ProtoField<T> = {
     type: ValueType;
     id: number;
     optional?: boolean;
+    repeated?: boolean;
 };
 
 export enum WireType {

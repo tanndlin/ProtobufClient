@@ -141,6 +141,31 @@ describe('Encoder Tests', () => {
         },
     );
 
+    it('Should encode repeated fields', () => {
+        //https://protobuf.dev/programming-guides/encoding/#repeated
+        const message = new ProtoMessageType('Test1`', [
+            {
+                type: 'string',
+                id: 4,
+                name: 'd',
+            },
+            {
+                type: 'int32',
+                id: 6,
+                name: 'e',
+                repeated: true,
+            },
+        ]);
+
+        const buffer = message.encode({
+            d: 'hello',
+            e: [1, 2, 3],
+        });
+        expect(buffer).toStrictEqual(
+            Buffer.from([0x32, 0x06, 0x03, 0x8e, 0x02, 0x9e, 0xa7, 0x05]),
+        );
+    });
+
     it('Should encode a double messsage field', () => {
         const message = new ProtoMessageType('Test1`', [
             {
