@@ -141,32 +141,10 @@ export function encodeRepeated<T>(
     field: ProtoField<T>,
     value: T[keyof T],
 ): number[] {
-    const buffer: number[] = [];
-
     if (!Array.isArray(value)) {
         throw new Error(`Field ${field.name} is not an array`);
     }
 
-    for (const item of value) {
-        buffer.push(...encodeVarint(item as number, field.type));
-    }
-
-    const bytes = encodePackedRepeated(field, value);
-    buffer.push(...encodeVarint(bytes.length, 'int32'));
-    buffer.push(...bytes);
-
-    return buffer;
-}
-
-export function encodePackedRepeated<T>(
-    field: ProtoField<T>,
-    values: T[keyof T][],
-): number[] {
-    // TODO - pack values
-    const buffer = [];
-    for (const value of values) {
-        buffer.push(...encodeValue(field, value));
-    }
-
-    return buffer;
+    const buffer = value.flatMap((v) => encodeVarint(v as number, field.type));
+    return [...encodeVarint(buffer.length, 'int32'), ...buffer];
 }
